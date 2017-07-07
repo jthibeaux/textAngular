@@ -564,6 +564,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                         continue;
                                     } else {
                                         var tagName = dom[0].childNodes[i].tagName.toLowerCase();
+                                        // PATCH JT: should allow span elements.
                                         if(tagName !== 'p' &&
                                             tagName !== 'ul' &&
                                             tagName !== 'h1' &&
@@ -678,6 +679,19 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                             if (/<li(\s.*)?>/i.test(text) && /(<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text) === false) {
                                 // insert missing parent of li element
                                 text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
+                            }
+
+                            // PATCH JT: if this is html text, we should not be
+                            // replacing whitespace.
+                            if (!text.match(/<html/) && !text.match(/<span/)) {
+                                // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
+                                text = text.replace(/^[ |\u00A0]+/gm, function (match) {
+                                    var result = '';
+                                    for (var i = 0; i < match.length; i++) {
+                                       result += '&nbsp;';
+                                    }
+                                    return result;
+                                }).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
                             }
 
                             // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
