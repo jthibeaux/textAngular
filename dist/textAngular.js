@@ -2253,6 +2253,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                         continue;
                                     } else {
                                         var tagName = dom[0].childNodes[i].tagName.toLowerCase();
+                                        // PATCH JT: should allow span elements.
                                         if(tagName !== 'p' &&
                                             tagName !== 'ul' &&
                                             tagName !== 'h1' &&
@@ -2369,14 +2370,18 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
                                 text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
                             }
 
-                            // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
-                            text = text.replace(/^[ |\u00A0]+/gm, function (match) {
-                                var result = '';
-                                for (var i = 0; i < match.length; i++) {
-                                    result += '&nbsp;';
-                                }
-                                return result;
-                            }).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                            // PATCH JT: if this is html text, we should not be
+                            // replacing whitespace.
+                            if (!text.match(/<html/) && !text.match(/<span/)) {
+                                // parse whitespace from plaintext input, starting with preceding spaces that get stripped on paste
+                                text = text.replace(/^[ |\u00A0]+/gm, function (match) {
+                                    var result = '';
+                                    for (var i = 0; i < match.length; i++) {
+                                        result += '&nbsp;';
+                                    }
+                                    return result;
+                                }).replace(/\n|\r\n|\r/g, '<br />').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                            }
 
                             if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 
